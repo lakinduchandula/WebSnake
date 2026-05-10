@@ -53,30 +53,35 @@ def capture_website(page, url: str, config: dict) -> tuple[Path, dict]:
 
 
 def main() -> None:
-    url = input("Enter website URL: ").strip()
+    while True:
+        url = input("\nEnter website URL (or 'quit' to exit): ").strip()
 
-    if not url.startswith(("http://", "https://")):
-        print("Invalid URL")
-        return
+        if url.lower() in {"quit", "exit", "q"}:
+            print("Exiting...")
+            break
 
-    # Load current configuration
-    config = load_config()
-    print(f"Current config: {config}")
+        if not url.startswith(("http://", "https://")):
+            print("Invalid URL. Please enter a valid URL starting with http:// or https://")
+            continue
 
-    try:
-        with sync_playwright() as playwright:
-            browser = playwright.chromium.launch(headless=True)
-            page = browser.new_page(viewport={"width": 1440, "height": 900})
-            screenshot_path, updated_config = capture_website(page, url, config)
-            browser.close()
+        # Load current configuration
+        config = load_config()
+        print(f"Current config: {config}")
 
-        # Save updated configuration
-        save_config(updated_config)
-        print(f"Screenshot saved: {screenshot_path}")
-        print(f"Updated config: {updated_config}")
+        try:
+            with sync_playwright() as playwright:
+                browser = playwright.chromium.launch(headless=True)
+                page = browser.new_page(viewport={"width": 1440, "height": 900})
+                screenshot_path, updated_config = capture_website(page, url, config)
+                browser.close()
 
-    except Exception as error:
-        print(f"Error: {error}")
+            # Save updated configuration
+            save_config(updated_config)
+            print(f"Screenshot saved: {screenshot_path}")
+            print(f"Updated config: {updated_config}")
+
+        except Exception as error:
+            print(f"Error: {error}")
 
 
 if __name__ == "__main__":
